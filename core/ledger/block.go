@@ -1,35 +1,56 @@
 package ledger
 
 import (
-	"github.com/Jaime2003z/Agora/core/storage"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"time"
 )
 
 type Block struct {
-	ID        int
-	Hash      string
-	PrevHash  string
-	Data      string
-	Timestamp int64
+	ID         int    `json:"id"`
+	Hash       string `json:"hash"`
+	PrevHash   string `json:"prev_hash"`
+	Data       string `json:"data"`
+	Timestamp  int64  `json:"timestamp"`
+	MerkleRoot string `json:"merkle_root"`
 }
 
-type Chain struct {
-	db *storage.DB
+// Serialize converts a Block to JSON bytes
+func (b *Block) Serialize() ([]byte, error) {
+	return json.Marshal(b)
 }
 
-func NewChain(db *storage.DB) *Chain {
-	return &Chain{
-		db: db,
+// DeserializeBlock converts JSON bytes to a Block
+func DeserializeBlock(data []byte) (*Block, error) {
+	var block Block
+	err := json.Unmarshal(data, &block)
+	if err != nil {
+		return nil, err
 	}
+	return &block, nil
 }
 
-func (c *Chain) AddBlock(data string) (*Block, error) {
-	// Implementation for adding a new block to the chain
-	// This is a placeholder - implement actual block creation logic
-	return &Block{
-		ID:        0, // Should be the next available ID
-		Hash:      "hash_placeholder",
-		PrevHash:  "prev_hash_placeholder",
+// CalculateHash computes the hash of the block
+func (b *Block) CalculateHash() string {
+	hasher := sha256.New()
+	hasher.Write([]byte(string(b.ID) + b.PrevHash + b.Data + string(b.Timestamp)))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+// NewBlock creates a new block with the given data and previous hash
+func NewBlock(data string, prevHash string) *Block {
+	block := &Block{
 		Data:      data,
-		Timestamp: 0, // Should be current timestamp
-	}, nil
+		PrevHash:  prevHash,
+		Timestamp: time.Now().Unix(),
+	}
+	blockData, err := block.Serialize()
+	if err != nil {
+		// handle error empty for now
+		blockData = []byte{}
+	}
+	block.MerkleRoot = MerkleRoot([][]byte{blockData})
+	block.Hash = block.CalculateHash()
+	return block
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync/atomic"
 	"time"
 )
 
@@ -84,6 +85,16 @@ func CastVote(proposal *Proposal, voterID string, approved bool, voteService Vot
 	event.Payload = payload
 
 	return &vote, event, nil
+}
+
+// counter is a simple thread-safe counter
+type counter struct {
+	value int64
+}
+
+// Add increments the counter and returns the new value
+func (c *counter) Add(delta int64) int64 {
+	return atomic.AddInt64(&c.value, delta)
 }
 
 // generateVoteID creates a unique ID for votes

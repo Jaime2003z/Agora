@@ -4,7 +4,11 @@ go 1.24.6
 
 toolchain go1.24.11
 
-require modernc.org/sqlite v1.40.1
+require (
+	github.com/gorilla/mux v1.8.1
+	github.com/libp2p/go-libp2p v0.46.0
+	modernc.org/sqlite v1.40.1
+)
 
 require (
 	github.com/benbjohnson/clock v1.3.5 // indirect
@@ -24,7 +28,6 @@ require (
 	github.com/koron/go-ssdp v0.0.6 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.2.0 // indirect
-	github.com/libp2p/go-libp2p v0.46.0 // indirect
 	github.com/libp2p/go-libp2p-asn-util v0.4.1 // indirect
 	github.com/libp2p/go-msgio v0.3.0 // indirect
 	github.com/libp2p/go-netroute v0.3.0 // indirect

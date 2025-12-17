@@ -1,3 +1,5 @@
+🇪🇸 [Leer en español](/docs/spanish/README.es.md)
+
 ⚠️ Before evaluating this project, please read [TECHNICAL_POSITION.md] ⚠️
 
 # Agora

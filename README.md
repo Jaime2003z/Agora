@@ -1,5 +1,7 @@
 ⚠️ Before evaluating this project, please read [TECHNICAL_POSITION.md] ⚠️
 
+# Agora
+
 **Agora** is an open-source, experimental coordination engine designed to help humans organize collective action transparently, efficiently, and across borders.
 
 It explores whether **reputation-based governance**, **verifiable execution**, and **open participation** can outperform traditional hierarchical institutions for certain classes of problems.

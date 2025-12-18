@@ -1,0 +1,25 @@
+# Binaries
+*.exe
+*.out
+*.bin
+agora-node
+
+# Databases / State
+*.db
+*.sqlite
+*.leveldb
+*.badger
+/state/
+/data/
+
+# Go
+/bin/
+/pkg/
+*.test
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

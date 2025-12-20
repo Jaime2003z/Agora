@@ -2,7 +2,6 @@
 *.exe
 *.out
 *.bin
-agora-node
 
 # Databases / State
 *.db

@@ -29,7 +29,7 @@ func NewIdentity(publicKey string, location string) (*Identity, error) {
 	return &Identity{
 		PublicKey:  publicKey,
 		Location:   location,
-		Reputation: 0,
+		Reputation: 10,
 		UserType:   User,
 	}, nil
 }

@@ -1,6 +1,11 @@
 package project
 
-import "errors"
+import (
+	"errors"
+	"strings"
+
+	"github.com/Jaime2003z/Agora/core/commons"
+)
 
 type ProjectStatus string
 
@@ -24,24 +29,42 @@ const (
 	Municipal                          // Project for a specific municipality
 )
 
-type Location struct {
-	Level        LocationLevel // Scope level of the project
-	Country      string        // ISO 3166-1 alpha-2 country code (e.g., "CO", "PE", "MX")
-	State        string        // State/Department code (e.g., "ANT" for Antioquia, "CDMX" for Mexico City)
-	Municipality string        // Municipality/City name (e.g., "Medellín", "Lima", "Acapulco")
+type Project struct {
+	ID           string
+	Title        string
+	Description  string
+	Status       ProjectStatus
+	Proposer     string
+	Location     commons.LocalityID
+	VotingWindow commons.TimeWindow
+	Milestones   []Milestone
+	Proposals    []string
+	Votes        []Vote
 }
 
-type Project struct {
-	ID          string
-	Title       string
-	Description string
-	Status      ProjectStatus
-	Proposer    string
-	Location    *Location
-	Voters      []string
-	Milestones  []Milestone
-	Proposals   []string
-	Votes       []string
+func isValidLocalityID(l commons.LocalityID) bool {
+	if l == "GLOBAL" {
+		return true
+	}
+
+	parts := strings.Split(string(l), "-")
+
+	// País
+	if len(parts[0]) != 2 {
+		return false
+	}
+
+	// Departamento
+	if len(parts) >= 2 && len(parts[1]) < 2 {
+		return false
+	}
+
+	// Municipio
+	if len(parts) >= 3 && len(parts[2]) < 3 {
+		return false
+	}
+
+	return true
 }
 
 // NewProject creates a new project with the given parameters
@@ -50,7 +73,9 @@ func NewProject(
 	title string,
 	description string,
 	proposer string,
-	location Location,
+	location *commons.LocalityID,
+	currentTick uint64,
+	requestedDuration uint64,
 ) (*Project, error) {
 
 	if id == "" {
@@ -65,8 +90,13 @@ func NewProject(
 		return nil, errors.New("proposer is required")
 	}
 
-	if location.Level == 0 {
-		return nil, errors.New("project level is required")
+	if !isValidLocalityID(*location) {
+		return nil, errors.New("project location is invalid")
+	}
+
+	duration := requestedDuration
+	if duration < commons.MinTimeWindow {
+		duration = commons.MinTimeWindow
 	}
 
 	return &Project{
@@ -75,10 +105,36 @@ func NewProject(
 		Description: description,
 		Status:      Propose,
 		Proposer:    proposer,
-		Location:    &location,
-		Voters:      []string{},
-		Milestones:  []Milestone{},
-		Proposals:   []string{},
-		Votes:       []string{},
+		Location:    *location,
+		VotingWindow: commons.TimeWindow{
+			Start: currentTick,
+			End:   currentTick + duration,
+		},
+		Milestones: []Milestone{},
+		Proposals:  []string{},
+		Votes:      []Vote{},
 	}, nil
+}
+
+func (p *Project) EvaluateProjectLifeCycle(currentTick uint64) error {
+	if p.Status != Propose {
+		return nil
+	}
+
+	if currentTick < p.VotingWindow.End {
+		return nil
+	}
+
+	approved, err := EvaluateVotingResult(p, currentTick)
+	if err != nil {
+		return err
+	}
+
+	if approved {
+		p.Status = Accept
+	} else {
+		p.Status = Reject
+	}
+
+	return nil
 }
